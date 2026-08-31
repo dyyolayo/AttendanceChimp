@@ -10,3 +10,4 @@ Need to update this from each branch
 8. Introduce linter in the future to check code
 9. Add read me file
 10. Create something that looks through code and files like this to remind me what to add, and look at what may be the most efficient to work on
+11. Ensure that the qrcode is uploaded through each person's personal device, so they are not shared/faked
