@@ -13,6 +13,7 @@
 
 daysOfTheWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 
+
 def verify_DOW(day:str):
     """This function is meant to verify if a proposed class date is one of the 
     days of the week"""
@@ -33,65 +34,117 @@ def verify_DOW(day:str):
             "Day must be a string"
             )
 
-class Student:
+class Person:
+    def __init__(self, fName:str , lName:str ):
+        self.firstName = fName
+        self.lastName = lName
+    
+    def print_name(self):
+        print(self.firstName, self.lastName)
+
+class Student(Person):
     # each student may take multiple courses, many students in each course
-    def __init__(self,first:str,last:str):
-        self.first = first
-        self.last = last 
-        self.courses = [] ###read python doc, here we are 
+    # Each student has a first and a last name
+    def __init__(self, fName:str, lName:str, year:int):
+        super().__init__(fName, lName)
+        self.year = year
 
-    def add_course(self,*course):
-        """Adds a course to the list of courses for each individual"""
-        for courseItem in course:
-            self.courses.append(courseItem)
-        ## Make it so that there is a clickable that allows the person to add the course through JS and then populate it like that
+class Teacher(Person):
+    pass
 
-    def full_name(self): #don't pass in first and last attr here because they are already init with self. (Stored with object)
-        return f"{self.first} {self.last}"
-
-class Teacher:
-    # each teacher may teach multiple courses, there can be multiple teachers for a course
-    def __init__(self,first,last):
-        self.first = first
-        self.last = last
-        self.courses = [] #each teacher teaches at least one course
-
-    def add_course(self,course):
-        """Adds a course to the list of courses for each individual"""
-        for courseItem in course:
-            self.courses.append(courseItem)
-
-class Course:
-    ##Want to add a way to map each lecture time to the specific lecture days, i.e. MWF : 10-1, T,Th: 3-4
-    # each Course can have multiple teachers, multiple enrolled and multiple lecture dates and times
-    def __init__(self,subject:str,name:str,numLectures:int):
+class Courses:
+    def __init__(self,cName:str ,subject:str):
+        self.courseName = cName
         self.subject = subject
-        self.name = name
-        self.numLectures = numLectures
-        self.lectureDateTimes = {}
+        self.lectures = []
 
-    def add_Lecture_DateTime(self,date,time):
-        if verify_DOW(date):
-            self.lectureDateTimes[date] = time
-        # Check format for date addition is correct
-        # condition for if it doesn't exist later
-
-class Lecture:
-    def __init__(self,course,time):
+    def add_lecture(self, *lectures):
+        for lecture in lectures:
+            self.lectures.append(lecture)
+    
+class Lectures():
+    def __init__(self, course, day, timePeriod):
         self.course = course 
-        self.time = time
+        self.day = day
+        self.timePeriod = timePeriod
+        self.students = []
         self.teachers = []
 
-    # def add_teacher(self,teacher):
+    def add_teachers(self, *teachers):
+        for teacher in teachers:
+            self.teachers.append(teacher)
+
+    def add_students(self, *students):
+        for student in students:
+            self.teachers.append(student)
 
 
-Math100 = Course("Math","Math100",2)
 
-Math100.add_Lecture_DateTime("Monday","7:30")
+Math100 = Courses("Math100", "math")
+Math100.add_lecture({"Monday":"7:30"})
+print(Math100.courseName, Math100.subject)
+print(Math100.lectures)
 
-print(Math100.lectureDateTimes)
+# class Teacher:
+#     # each teacher may teach multiple courses, there can be multiple teachers for a course
+#     ls_of_teachers = []
 
-# firstStudent = Student("Jack","Swagger")
-# firstStudent.add_course("Math","Science")
-# print(firstStudent.full_name())
-# print(firstStudent.courses)
+#     def __init__(self,first,last):
+#         self.first = first
+#         self.last = last
+#         self.courses = [] #each teacher teaches at least one course
+#         self.lectures = [] #each teacher has a lecture time period
+#         Teacher.ls_of_teachers.append(self)
+
+#     # def __repr__(self):
+#     #     return f"{self.first!r}"
+#     def add_course(self,*course):
+#         """Adds a course to the list of courses for each individual"""
+#         for courseItem in course:
+#             self.courses.append(courseItem)
+
+# class Course:
+#     ##Want to add a way to map each lecture time to the specific lecture days, i.e. MWF : 10-1, T,Th: 3-4
+#     # each Course can have multiple teachers, multiple enrolled and multiple lecture dates and times
+#     def __init__(self,subject:str,name:str,numLectures:int):
+#         self.subject = subject
+#         self.name = name
+#         self.numLectures = numLectures
+#         self.lectureDateTimes = {}
+#         self.teachers = []
+
+#     def add_Lecture_DateTime(self,date,time):
+#         if verify_DOW(date):
+#             self.lectureDateTimes[date] = time
+#         # Check format for date addition is correct
+#         # condition for if it doesn't exist later
+
+# class Lecture:
+#     def __init__(self,course,time):
+#         self.course = course 
+#         self.time = time
+#         self.teachers = []
+#         self.students = []
+
+#     def add_teacher(self,*lsofTeachers):
+#         for teacher in lsofTeachers:
+#             if teacher in Teacher.ls_of_teachers:
+#                 self.teachers.append(teacher)
+
+
+# Math100 = Course("Math","Math100",2)
+
+# # Math100.add_Lecture_DateTime("Monday","7:30")
+
+# # print(Math100.lectureDateTimes)
+
+# msM = Teacher("Amy", "Mansour")
+# mrL = Teacher("Terry", "Lewis")
+
+# # print(Teacher.ls_of_teachers)
+# print(msM)
+
+# # firstStudent = Student("Jack","Swagger")
+# # firstStudent.add_course("Math","Science")
+# # print(firstStudent.full_name())
+# # print(firstStudent.courses)
