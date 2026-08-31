@@ -1,5 +1,10 @@
+Need to update this from each branch
+
 1. Need classes
 2. Need people
 3. Need lectures session
 4. Need qrcode
 5. Need ORM
+6. We want a way to check that for each lecture session there is a qrcode generated
+7. Automate reminders for students who continously miss class
+8.  
