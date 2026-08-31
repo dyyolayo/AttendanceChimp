@@ -1,1 +1,5 @@
-1. 
+1. Need classes
+2. Need people
+3. Need lectures session
+4. Need qrcode
+5. Need ORM
