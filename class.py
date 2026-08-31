@@ -48,6 +48,11 @@ class Student(Person):
     def __init__(self, fName:str, lName:str, year:int):
         super().__init__(fName, lName)
         self.year = year
+        self.lectures = []
+    
+    def add_lectures(self):
+        # if student in this lecture, add lecture to the student list of lectures
+        pass
 
 class Teacher(Person):
     pass
@@ -64,6 +69,7 @@ class Courses:
     
 class Lectures():
     def __init__(self, course, day, timePeriod):
+        # each lecture has multiple qrcodes, a new one generated each day
         self.course = course 
         self.day = day
         self.timePeriod = timePeriod
