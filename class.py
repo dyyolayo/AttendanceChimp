@@ -11,6 +11,8 @@
 ## Might want to change the design so that 
 ## Separate helper functions from here
 
+import itertools
+
 daysOfTheWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 
 
@@ -48,33 +50,61 @@ class Student(Person):
     def __init__(self, fName:str, lName:str, year:int):
         super().__init__(fName, lName)
         self.year = year
-        self.lectures = []
+        self.sections = []
     
-    def add_lectures(self):
+    def add_sections(self,course, section):
         # if student in this lecture, add lecture to the student list of lectures
-        pass
+
+        if course in Course.courseName():
+            pass
+
+mya = Student("Mya","Williams",4)
+# mya.add_lectures("Math100", {"Monday":"8:30"})
 
 class Teacher(Person):
     pass
 
-class Courses:
+class Course:
+    idIter = itertools.count()
+    availableCourses = {}
+
     def __init__(self,cName:str ,subject:str):
+        self.idNum = next(self.idIter)
         self.courseName = cName
         self.subject = subject
-        self.lectures = []
+        self.sections = []
+        self.availableCourses[self.courseName] = self
 
-    def add_lecture(self, *lectures):
-        for lecture in lectures:
-            self.lectures.append(lecture)
+    def add_section(self, *sections):
+        for section in sections:
+            self.sections.append(section)
     
-class Lectures():
-    def __init__(self, course, day, timePeriod):
+class Section():
+    def __init__(self, course, sectionNum):
         # each lecture has multiple qrcodes, a new one generated each day
         self.course = course 
-        self.day = day
-        self.timePeriod = timePeriod
+        self.sectionNum = sectionNum
+        self.classTime = {}
         self.students = []
         self.teachers = []
+
+    def add_classTime(self,day,startTime,endTime):
+        self.classTime[day] = [startTime,endTime]
+
+
+    # def add_dayTime(self, **dayTimes):
+    #     """Function designed to add a day and a time-slot for each lecture. 
+    #     This way we can have Math100 on monday at 8-9 and add 10-11"""
+    #     for x,y in dayTimes.items():
+    #         if x in self.dayTime.keys():
+    #             if self.dayTime[x] == dayTimes[x]:
+    #                 return True
+    #             else: 
+    #                 [self.dayTime[x].append(y) for y in dayTimes[x] if y not in self.dayTime[x]] 
+    #                 return "updated"
+    #         else:
+    #             self.dayTime[x] = y
+    #             return "updated"
 
     def add_teachers(self, *teachers):
         for teacher in teachers:
@@ -82,75 +112,30 @@ class Lectures():
 
     def add_students(self, *students):
         for student in students:
-            self.teachers.append(student)
+            self.students.append(student)
 
 
 
-Math100 = Courses("Math100", "math")
-Math100.add_lecture({"Monday":"7:30"})
-print(Math100.courseName, Math100.subject)
-print(Math100.lectures)
-
-# class Teacher:
-#     # each teacher may teach multiple courses, there can be multiple teachers for a course
-#     ls_of_teachers = []
-
-#     def __init__(self,first,last):
-#         self.first = first
-#         self.last = last
-#         self.courses = [] #each teacher teaches at least one course
-#         self.lectures = [] #each teacher has a lecture time period
-#         Teacher.ls_of_teachers.append(self)
-
-#     # def __repr__(self):
-#     #     return f"{self.first!r}"
-#     def add_course(self,*course):
-#         """Adds a course to the list of courses for each individual"""
-#         for courseItem in course:
-#             self.courses.append(courseItem)
-
-# class Course:
-#     ##Want to add a way to map each lecture time to the specific lecture days, i.e. MWF : 10-1, T,Th: 3-4
-#     # each Course can have multiple teachers, multiple enrolled and multiple lecture dates and times
-#     def __init__(self,subject:str,name:str,numLectures:int):
-#         self.subject = subject
-#         self.name = name
-#         self.numLectures = numLectures
-#         self.lectureDateTimes = {}
-#         self.teachers = []
-
-#     def add_Lecture_DateTime(self,date,time):
-#         if verify_DOW(date):
-#             self.lectureDateTimes[date] = time
-#         # Check format for date addition is correct
-#         # condition for if it doesn't exist later
-
-# class Lecture:
-#     def __init__(self,course,time):
-#         self.course = course 
-#         self.time = time
-#         self.teachers = []
-#         self.students = []
-
-#     def add_teacher(self,*lsofTeachers):
-#         for teacher in lsofTeachers:
-#             if teacher in Teacher.ls_of_teachers:
-#                 self.teachers.append(teacher)
+math100 = Course("Math100", "Math")
+literature100 = Course("Lit100", "Literature")
 
 
-# Math100 = Course("Math","Math100",2)
 
-# # Math100.add_Lecture_DateTime("Monday","7:30")
+# print(Course.availableCourses)
+def create_section(courseName, sectionNum):
+    courseDict = Course.availableCourses
 
-# # print(Math100.lectureDateTimes)
+    if courseName in courseDict.keys():
+        courseObj = courseDict[courseName]
+        section = Section(courseName,sectionNum)
+        courseObj.add_section(section)
 
-# msM = Teacher("Amy", "Mansour")
-# mrL = Teacher("Terry", "Lewis")
+        return section
+    
+    else:
+        return "course does not exist"
 
-# # print(Teacher.ls_of_teachers)
-# print(msM)
 
-# # firstStudent = Student("Jack","Swagger")
-# # firstStudent.add_course("Math","Science")
-# # print(firstStudent.full_name())
-# # print(firstStudent.courses)
+math100Section1 = create_section("Math100",1)
+
+print(math100Section1.course)
