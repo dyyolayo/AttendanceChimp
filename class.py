@@ -3,43 +3,56 @@
 ## This comment, I hope to use when I have something I want to add vs the regular # comment 
 ### Personal comments
 
-# Everytime I add a student to a course, I want the course amount to update
 
-############TODO############
-#Look through code and note necessary edits here 
-## Look into DB design to verify if a teacher is in a course, start working on SQL
-## Might want to change the design so that 
+############TODO############ : Look through code and note necessary edits here 
+
+## Review Changes
+## Docstrings
+## Add verification for teachers
+## Incorporate SQL
 ## Separate helper functions from here
+## To keep things small, may need to isolate People and Course, Lecture models
+
+############ CHANGES ############
 
 import itertools
 
-daysOfTheWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+class StudentManager:
+    all_students = {}
+    @classmethod
+    def add_student(cls,studentId, studentObj):
+        cls.all_students[studentId] = studentObj
 
+    @classmethod
+    def get_student(cls,studentId):
+        if studentId in cls.all_students:
+            return cls.all_students.get(studentId)
 
-def verify_DOW(day:str):
-    """This function is meant to verify if a proposed class date is one of the 
-    days of the week"""
-
-    try:
-        if day in daysOfTheWeek:
-            return True
-        
-        raise ValueError(
-            f"The day you entered, {day} is not one of the available days of the week"
-                         ) #replace with logs
+    @classmethod
+    def del_student(cls,studentId):
+        return cls.all_students[studentId], cls.all_students.pop(studentId,None)
     
-    except ValueError:
-        return False
+class TeacherManager :
+    all_teachers = {}
+    @classmethod
+    def add_teacher(cls,teacherName, teacherObj):
+        cls.all_teachers[teacherName] = teacherObj
+
+    @classmethod
+    def get_teacher(cls,teacherName):
+        return cls.all_teachers.get(teacherName)
+
+    @classmethod
+    def del_teacher(cls,teacherName):
+        return cls.all_teachers.pop(teacherName)
     
-    except TypeError:
-        raise TypeError (
-            "Day must be a string"
-            )
+
 
 class Person:
     def __init__(self, fName:str , lName:str ):
         self.firstName = fName
         self.lastName = lName
+        self.fullName = f"{self.firstName} {self.lastName}"
     
     def print_name(self):
         print(self.firstName, self.lastName)
@@ -47,41 +60,77 @@ class Person:
 class Student(Person):
     # each student may take multiple courses, many students in each course
     # Each student has a first and a last name
+    idIter = itertools.count(1)
+
     def __init__(self, fName:str, lName:str, year:int):
         super().__init__(fName, lName)
         self.year = year
         self.sections = []
+        self.qrcode_section = {}
+        self.idNum = next(self.idIter)
+        StudentManager.add_student(self.idNum,self)
+
     
-    def add_sections(self,course, section):
-        # if student in this lecture, add lecture to the student list of lectures
+    def add_sections(self, courseName, sectionNum):
+        section = get_section(courseName,sectionNum)
 
-        if course in Course.courseName():
-            pass
+        if section is None:
+            print("Section does not exist")
+            return None
+        
+        if check_student_in_section(self.idNum,section):
+            self.sections.append(section)
+            print("You've successfully added section")
+            return True
+        
+        print("Make sure you are added to the section before you add it to your list")
+        return None
 
-mya = Student("Mya","Williams",4)
-# mya.add_lectures("Math100", {"Monday":"8:30"})
+        
+    def upload_qrcode(self,section,code,date):
+        self.qrcode_section[date] = [section, code]
+
 
 class Teacher(Person):
-    pass
+    idIter = itertools.count()
+    def __init__(self, fName, lName):
+        super().__init__(fName, lName)
+        self.idNum = next(self.idIter)
+        TeacherManager.add_teacher(self.fullName,self)
+
+
+
+class CourseManager:
+    availableCourses = {}
+
+    @classmethod
+    def add_course(cls,courseName,courseObj):
+        cls.availableCourses[courseName] = courseObj
+
+    @classmethod
+    def get_course(cls,courseName):
+        return cls.availableCourses.get(courseName)
+
+    @classmethod
+    def del_course(cls,courseName):
+        return cls.availableCourses.pop(courseName)
 
 class Course:
     idIter = itertools.count()
-    availableCourses = {}
 
     def __init__(self,cName:str ,subject:str):
         self.idNum = next(self.idIter)
         self.courseName = cName
         self.subject = subject
-        self.sections = []
-        self.availableCourses[self.courseName] = self
+        self.sectionList = []
+
+        CourseManager.add_course(self.courseName,self)
 
     def add_section(self, *sections):
-        for section in sections:
-            self.sections.append(section)
+            self.sectionList.extend(sections)
     
 class Section():
     def __init__(self, course, sectionNum):
-        # each lecture has multiple qrcodes, a new one generated each day
         self.course = course 
         self.sectionNum = sectionNum
         self.classTime = {}
@@ -91,43 +140,35 @@ class Section():
     def add_classTime(self,day,startTime,endTime):
         self.classTime[day] = [startTime,endTime]
 
-
-    # def add_dayTime(self, **dayTimes):
-    #     """Function designed to add a day and a time-slot for each lecture. 
-    #     This way we can have Math100 on monday at 8-9 and add 10-11"""
-    #     for x,y in dayTimes.items():
-    #         if x in self.dayTime.keys():
-    #             if self.dayTime[x] == dayTimes[x]:
-    #                 return True
-    #             else: 
-    #                 [self.dayTime[x].append(y) for y in dayTimes[x] if y not in self.dayTime[x]] 
-    #                 return "updated"
-    #         else:
-    #             self.dayTime[x] = y
-    #             return "updated"
-
     def add_teachers(self, *teachers):
         for teacher in teachers:
             self.teachers.append(teacher)
 
     def add_students(self, *students):
-        for student in students:
-            self.students.append(student)
+
+        nonExistentStudents = []
+        for studentId in students:
+            if check_student_exists(studentId):
+                if studentId not in self.students:
+                    self.students.append(studentId)
+            else:
+                nonExistentStudents.append(studentId)
 
 
 
-math100 = Course("Math100", "Math")
-literature100 = Course("Lit100", "Literature")
+class QRcode:
+    def __init__(self,qrcode,date,section):
+        self.qrcode = qrcode
+        self.date = date
+        self.section = section
+    pass
 
-
-
-# print(Course.availableCourses)
 def create_section(courseName, sectionNum):
-    courseDict = Course.availableCourses
+    courseDict = CourseManager.availableCourses
 
     if courseName in courseDict.keys():
         courseObj = courseDict[courseName]
-        section = Section(courseName,sectionNum)
+        section = Section(courseObj,sectionNum)
         courseObj.add_section(section)
 
         return section
@@ -136,6 +177,42 @@ def create_section(courseName, sectionNum):
         return "course does not exist"
 
 
-math100Section1 = create_section("Math100",1)
+def get_section(courseName, sectionNum):
+    if courseName not in CourseManager.availableCourses:
+        return None
+    
 
-print(math100Section1.course)
+    courseObj = CourseManager.availableCourses[courseName]
+
+    for section in courseObj.sectionList:
+        if sectionNum == section.sectionNum:
+            return section
+    
+    return None
+
+def check_student_exists(studentId):
+    if studentId in StudentManager.all_students:
+        return True
+    return False
+
+def check_student_in_section(studentId,section):
+    return studentId in section.students
+
+############################################################ Test area ############################################################
+
+math100 = Course("Math100", "Math")
+literature100 = Course("Lit100", "Literature")
+
+MrL = Teacher("Mannor", "Louis")
+math100Section1 = create_section("Math100", 1)
+
+mya = Student("Mya","Williams",4)
+
+math100Section1.add_students(1) #need to assign unique Id later
+
+mya.add_sections("Math100", 1)
+
+print(math100Section1.students)
+
+
+############################################################ Extra Code  ############################################################
